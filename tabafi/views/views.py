@@ -23,19 +23,25 @@ def login(request):
         elif request.data.get('user_type') == '0':
             customers = Customer.objects.all()
             for customer in customers:
-                if request.data.get('username') == customer.username:
+                if request.data.get('username') == customer.username and request.data.get('password') == customer.password:
                     token = binascii.hexlify(os.urandom(20)).decode()
                     customer.token = token
                     customer.save()
                     return Response({'token': customer.token, 'id': customer.id, 'name': customer.first_name},
                                     status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'wrong username or password'},
+                                    status=status.HTTP_401_UNAUTHORIZED)
         elif request.data.get('user_type') == '1':
             farmers = Farmer.objects.all()
             for farmer in farmers:
-                if request.data.get('username') == farmer.username:
+                if request.data.get('username') == farmer.username  and request.data.get('password') == farmer.password:
                     token = binascii.hexlify(os.urandom(20)).decode()
                     farmer.token = token
                     farmer.save()
                     return Response({'token': farmer.token, 'id': farmer.id, 'name': farmer.first_name},
                                     status=status.HTTP_200_OK)
-        return Response({'error': 'user not found'}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                return Response({'error': 'wrong username or password'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+        # return Response({'error': 'user not found'}, status=status.HTTP_401_UNAUTHORIZED)
