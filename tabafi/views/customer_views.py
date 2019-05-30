@@ -15,8 +15,12 @@ def get_delete_update_customer(request, pk):
 
     # get details of a single customer
     if request.method == 'GET':
-        serializer = CustomerSerializer(customer)
-        return Response(serializer.data)
+        if request.method == 'GET':
+            if customer.token == request.META['HTTP_AUTHORIZATION']:
+                serializer = CustomerSerializer(customer)
+                return Response(serializer.data)
+            else:
+                return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
 
     # delete a single customer
     elif request.method == 'DELETE':

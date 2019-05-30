@@ -15,8 +15,12 @@ def get_delete_update_farmer(request, pk):
 
     # get details of a single farmer
     if request.method == 'GET':
-        serializer = FarmerSerializer(farmer)
-        return Response(serializer.data)
+        if farmer.token == request.META['HTTP_AUTHORIZATION']:
+            serializer = FarmerSerializer(farmer)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
     # delete a single farmer
     elif request.method == 'DELETE':

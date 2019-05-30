@@ -38,4 +38,4 @@ def login(request):
                     farmer.save()
                     return Response({'token': farmer.token, 'id': farmer.id, 'name': farmer.first_name},
                                     status=status.HTTP_200_OK)
-        return Response({'error': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'user not found'}, status=status.HTTP_401_UNAUTHORIZED)
