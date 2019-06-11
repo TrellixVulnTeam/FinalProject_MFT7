@@ -20,24 +20,28 @@ class Farmer(models.Model):
         return self.username
 
 
-class Fruit(models.Model):
+class Product(models.Model):
     id = models.AutoField(primary_key=True)
-    type = models.CharField(max_length=255)
-    weight = models.DecimalField(null=True, blank=True,decimal_places=10,max_digits=10)
-    price = models.DecimalField(null=False,blank=False,decimal_places=20,max_digits=20)
-    description = models.CharField(null=False,blank=False,max_length=300)
+    farmer = models.ForeignKey(Farmer, related_name='products', on_delete=models.CASCADE)
+    fruit_name = models.CharField(max_length=255)
+    weight = models.DecimalField(null=True, blank=True, decimal_places=10, max_digits=10)
+    price = models.CharField(max_length=60)
+    description = models.CharField(null=False, blank=False, max_length=300)
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.id
 
 
-class FruitImage(models.Model):
+class ProductImage(models.Model):
     image_file = models.ImageField(upload_to='images', blank=True, null=True)
-    image = models.ForeignKey(Fruit, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
 
 class Customer(models.Model):
-    id = models.AutoField('id',primary_key=True)
+    id = models.AutoField('id', primary_key=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     username = models.CharField(
@@ -58,16 +62,16 @@ class Customer(models.Model):
 class Request(models.Model):
     id = models.AutoField(primary_key=True)
     fruit_type = models.CharField(max_length=255)
-    ordered_weight = models.DecimalField(null=True, blank=True,decimal_places=10,max_digits=10)
+    ordered_weight = models.DecimalField(null=True, blank=True, decimal_places=10, max_digits=10)
     farmer_lat = models.DecimalField(max_digits=9, decimal_places=6)
     farmer_lng = models.DecimalField(max_digits=9, decimal_places=6)
     customer_lat = models.DecimalField(max_digits=9, decimal_places=6)
     customer_lng = models.DecimalField(max_digits=9, decimal_places=6)
+
     # driver_id = models.ForeignKey(Driver, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id
-
 
 # class Location(models.Model):
 #     latitude = models.FloatField()

@@ -26,5 +26,10 @@ urlpatterns = [
         r'^api/v1/login/$',
         views.login,
         name='farmer_login'
+    ),
+    url(
+        r'^api/v1/products/(?P<pk>[0-9]+)$',
+        farmer_views.get_post_products,
+        name='farmer_get_post_products'
     )
 ]
