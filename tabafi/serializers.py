@@ -26,6 +26,12 @@ class FarmerLoginSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name', 'token')
 
 
+class ProductFarmerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Farmer
+        fields = ('id', 'first_name', 'last_name', 'username', 'phone_number')
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
@@ -34,6 +40,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
+    farmer = ProductFarmerSerializer(many=False, read_only=True)
 
     class Meta:
         model = Product
