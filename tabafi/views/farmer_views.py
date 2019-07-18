@@ -1,9 +1,12 @@
 from rest_framework.decorators import api_view
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
+from rest_framework.views import APIView
 
-from tabafi.models import Farmer, Product
-from tabafi.serializers import FarmerSerializer, FarmerProductsSerializer, NewProductsSerializer
+from tabafi.models import Farmer, Product, ProductImage, Request, Customer
+from tabafi.serializers import FarmerSerializer, FarmerProductsSerializer, ProductSerializer, ProductImageSerializer, \
+    RequestSerializer
 
 
 @api_view(['GET', 'DELETE', 'PUT'])
@@ -59,27 +62,138 @@ def get_post_farmers(request):
 
 @api_view(['GET', 'POST'])
 def get_post_products(request, pk):
-    farmer = Farmer.objects.get(pk=pk)
+    try:
+        farmer = Farmer.objects.get(pk=pk)
+    except Farmer.DoesNotExist:
+        return Response({'error': 'Farmer not found'}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
         farmer_token = request.META['HTTP_AUTHORIZATION']
         if farmer.token == farmer_token:
-            products = Product.objects.all().filter(farmer=farmer)
-            # print(products)
-            serializer = FarmerProductsSerializer(instance=farmer)
+            serializer = FarmerProductsSerializer(instance=farmer, context={'request': request})
             return Response(serializer.data)
         else:
             return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
     # insert a new record for a farmer
     elif request.method == 'POST':
-        data = {
-            'farmer': int(pk),
-            'fruit_name': request.data.get('fruit_name'),
-            'weight': request.data.get('weight'),
-            'price': request.data.get('price'),
-            'description': request.data.get('description')
-        }
-        serializer = NewProductsSerializer(data=data)
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'DELETE', 'PUT'])
+def get_delete_update_product(request, uuid, pk):
+    farmer = Farmer.objects.get(pk=uuid)
+    try:
+        token = request.META['HTTP_AUTHORIZATION']
+        if farmer.token == token:
+            try:
+                product = Product.objects.get(pk=pk)
+            except Product.DoesNotExist:
+                return Response({'error': 'Product not found'}, status.HTTP_404_NOT_FOUND)
+
+            # get details of a single product
+            if request.method == 'GET':
+                # images = ProductImage(product)
+                serializer = ProductSerializer(product, context={'request': request})
+                return Response(serializer.data)
+                # if customer.token == request.META['HTTP_AUTHORIZATION']:
+                #     serializer = CustomerSerializer(customer)
+                #     return Response(serializer.data)
+                # else:
+                #     return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            # delete a single product
+            elif request.method == 'DELETE':
+                product.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            # update details of a single product
+            elif request.method == 'PUT':
+                serializer = ProductSerializer(product, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+    except KeyError as e:
+        print(e)
+        return Response({'error': 'bad request'}, status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def post_product_image(request, pid):
+    try:
+        product = Product.objects.get(pk=pid)
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status.HTTP_404_NOT_FOUND)
+    img = request.FILES.get('image')
+    # post selected image
+    if request.method == 'POST':
+        # for img in request.FILES.getlist('image'):
+        image = ProductImage(image_file=img, product=product)
+        image.save()
+        return Response(status=status.HTTP_201_CREATED)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def delete_product_image(request, pid):
+    try:
+        image = ProductImage.objects.get(pk=pid)
+    except ProductImage.DoesNotExist:
+        return Response({'error': 'Image not found'}, status.HTTP_404_NOT_FOUND)
+
+    # delete product image
+    if request.method == 'DELETE':
+        image.delete()
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST', 'DELETE'])
+def post_delete_farmer_avatar(request, pid):
+    try:
+        farmer = Farmer.objects.get(pk=pid)
+    except Farmer.DoesNotExist:
+        return Response({'error': 'Product not found'}, status.HTTP_404_NOT_FOUND)
+
+    # post selected image
+    if request.method == 'POST':
+        image = request.FILES.get('image')
+        farmer.avatar = image
+        farmer.save()
+        return Response(status=status.HTTP_201_CREATED)
+    # delete product image
+    elif request.method == 'DELETE':
+        farmer.avatar.delete()
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestList(generics.ListAPIView):
+    # newss = Request(customer=Customer.objects.get(id=1), fruit_name='Orange', weight=0.22, description='Not bad', customer_lat=22,
+    #                 customer_lng=33, province='yazd', city='yazd', address='my house')
+    # newss.save()
+    serializer_class = RequestSerializer
+
+    def get_queryset(self):
+        requests = Request.objects.all()
+        limit = self.request.query_params.get('limit', None)
+        offset = self.request.query_params.get('offset', None)
+        distance = self.request.query_params.get('distance', None)
+        # if limit is not None:
+        #     requests = requests.filter(purchaser__username=username)
+        # if offset is not None:
+        #     requests = requests.filter(purchaser__username=username)
+        # if distance is not None:
+        #     requests = requests.filter(purchaser__username=username)
+        return requests
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        return Response({'requests': response.data}, status=status.HTTP_200_OK)

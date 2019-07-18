@@ -43,14 +43,14 @@ def get_post_customers(request):
         return Response(serializer.data)
     # insert a new record for a customer
     elif request.method == 'POST':
-        data = {
-            'first_name': request.data.get('first_name'),
-            'last_name': request.data.get('last_name'),
-            'username': request.data.get('username'),
-            'shop_name': request.data.get('shop_name'),
-            'phone_number': request.data.get('phone_number')
-        }
-        serializer = CustomerSerializer(data=data)
+        # data = {
+        #     'first_name': request.data.get('first_name'),
+        #     'last_name': request.data.get('last_name'),
+        #     'username': request.data.get('username'),
+        #     'shop_name': request.data.get('shop_name'),
+        #     'phone_number': request.data.get('phone_number')
+        # }
+        serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
