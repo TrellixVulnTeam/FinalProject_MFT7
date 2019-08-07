@@ -176,9 +176,6 @@ def post_delete_farmer_avatar(request, pid):
 
 
 class RequestList(generics.ListAPIView):
-    # newss = Request(customer=Customer.objects.get(id=1), fruit_name='Orange', weight=0.22, description='Not bad', customer_lat=22,
-    #                 customer_lng=33, province='yazd', city='yazd', address='my house')
-    # newss.save()
     serializer_class = RequestSerializer
 
     def get_queryset(self):
