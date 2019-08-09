@@ -46,7 +46,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             'id', 'farmer', 'fruit_name', 'weight', 'price', 'description', 'farm_lat', 'farm_lng', 'province', 'city',
-            'address', 'images')
+            'address', 'created_at', 'updated_at', 'images')
 
 
 class FarmerProductsSerializer(serializers.ModelSerializer):
