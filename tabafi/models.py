@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from django.contrib.auth.models import User
@@ -15,9 +16,9 @@ class Farmer(models.Model):
     )
     token = models.CharField(max_length=150, null=True)
     password = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    phone_number = models.CharField(max_length=15)
+    created_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    updated_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     avatar = models.ImageField(upload_to='avatar', blank=True, null=True)
 
     def __str__(self):
@@ -28,16 +29,16 @@ class Product(models.Model):
     id = models.AutoField(primary_key=True)
     farmer = models.ForeignKey(Farmer, related_name='products', on_delete=models.CASCADE)
     fruit_name = models.CharField(max_length=255)
-    weight = models.DecimalField(null=True, blank=True, decimal_places=5, max_digits=10)
+    weight = models.DecimalField(null=True, blank=True, decimal_places=7, max_digits=10)
     price = models.CharField(max_length=60)
     description = models.CharField(null=False, blank=False, max_length=1000)
-    farm_lat = models.DecimalField(null=True, blank=True, max_digits=9, decimal_places=6)
-    farm_lng = models.DecimalField(null=True, blank=True, max_digits=9, decimal_places=6)
+    farm_lat = models.DecimalField(null=True, blank=True, max_digits=12, decimal_places=6)
+    farm_lng = models.DecimalField(null=True, blank=True, max_digits=12, decimal_places=6)
     province = models.CharField(max_length=30, null=True, blank=True)
     city = models.CharField(max_length=30, null=True, blank=True)
     address = models.CharField(max_length=150, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    updated_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     class Meta:
         ordering = ['id']
@@ -70,8 +71,8 @@ class Customer(models.Model):
     password = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=15)
     shop_name = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    updated_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     def __str__(self):
         return self.id
@@ -81,15 +82,15 @@ class Request(models.Model):
     id = models.AutoField(primary_key=True)
     customer = models.ForeignKey(Customer, related_name='requests', on_delete=models.CASCADE)
     fruit_name = models.CharField(max_length=255)
-    weight = models.DecimalField(null=True, blank=True, decimal_places=10, max_digits=10)
+    weight = models.DecimalField(null=True, blank=True, decimal_places=7, max_digits=10)
     description = models.CharField(null=False, blank=False, max_length=1000)
-    customer_lat = models.DecimalField(max_digits=9, decimal_places=6)
-    customer_lng = models.DecimalField(max_digits=9, decimal_places=6)
+    customer_lat = models.DecimalField(max_digits=12, decimal_places=6)
+    customer_lng = models.DecimalField(max_digits=12, decimal_places=6)
     province = models.CharField(max_length=30, default=None)
     city = models.CharField(max_length=30, default=None)
     address = models.CharField(max_length=150, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    updated_at = models.DateTimeField(default=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     # driver_id = models.ForeignKey(Driver, on_delete=models.CASCADE)
     class Meta:
