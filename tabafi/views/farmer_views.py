@@ -67,8 +67,7 @@ def get_post_products(request, pk):
     except Farmer.DoesNotExist:
         return Response({'error': 'Farmer not found'}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        farmer_token = request.META['HTTP_AUTHORIZATION']
-        if farmer.token == farmer_token:
+        if farmer.token == request.META['HTTP_AUTHORIZATION']:
             serializer = FarmerProductsSerializer(instance=farmer, context={'request': request})
             return Response(serializer.data)
         else:
@@ -86,8 +85,7 @@ def get_post_products(request, pk):
 def get_delete_update_product(request, uuid, pk):
     farmer = Farmer.objects.get(pk=uuid)
     try:
-        token = request.META['HTTP_AUTHORIZATION']
-        if farmer.token == token:
+        if farmer.token == request.META['HTTP_AUTHORIZATION']:
             try:
                 product = Product.objects.get(pk=pk)
             except Product.DoesNotExist:
