@@ -20,7 +20,8 @@ def get_delete_update_farmer(request, pk):
     if request.method == 'GET':
         if farmer.token == request.META['HTTP_AUTHORIZATION']:
             serializer = FarmerSerializer(farmer)
-            return Response(serializer.data)
+            return Response(serializer.data,
+                            content_type="application/json; charset=utf-8")
         else:
             return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -43,7 +44,8 @@ def get_post_farmers(request):
     if request.method == 'GET':
         farmers = Farmer.objects.all()
         serializer = FarmerSerializer(farmers, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data,
+                        content_type="application/json; charset=utf-8")
     # insert a new record for a farmer
     elif request.method == 'POST':
         data = {
@@ -69,7 +71,8 @@ def get_post_products(request, pk):
     if request.method == 'GET':
         if farmer.token == request.META['HTTP_AUTHORIZATION']:
             serializer = FarmerProductsSerializer(instance=farmer, context={'request': request})
-            return Response(serializer.data)
+            return Response(serializer.data,
+                            content_type="application/json; charset=utf-8")
         else:
             return Response({'error': 'token expired'}, status=status.HTTP_401_UNAUTHORIZED)
     # insert a new record for a farmer
@@ -95,7 +98,8 @@ def get_delete_update_product(request, uuid, pk):
             if request.method == 'GET':
                 # images = ProductImage(product)
                 serializer = ProductSerializer(product, context={'request': request})
-                return Response(serializer.data)
+                return Response(serializer.data,
+                                content_type="application/json; charset=utf-8")
                 # if customer.token == request.META['HTTP_AUTHORIZATION']:
                 #     serializer = CustomerSerializer(customer)
                 #     return Response(serializer.data)
